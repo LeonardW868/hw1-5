@@ -101,6 +101,21 @@
             margin-bottom: 15px;
         }
 
+        .add-data-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            border-left: 5px solid var(--accent-color);
+        }
+
+        .add-data-section input {
+            padding: 8px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 20px 10px;
@@ -131,6 +146,17 @@
 
         <div class="analysis-section">
             <div class="chart-container" id="genderChart"></div>
+            
+            <div class="add-data-section">
+                <h3><i class="fas fa-plus-circle"></i> Add Temporary Data Point</h3>
+                <form id="tempDataForm" onsubmit="addTemporaryPoint(event)">
+                    <input type="number" id="yearInput" placeholder="Year" required>
+                    <input type="number" id="maleRate" placeholder="Male Rate %" step="0.1" required>
+                    <input type="number" id="femaleRate" placeholder="Female Rate %" step="0.1" required>
+                    <button type="submit" class="button">Add Point</button>
+                    <button type="button" class="button" onclick="resetChart()">Reset</button>
+                </form>
+            </div>
             
             <div class="insights">
                 <h3><i class="fas fa-lightbulb"></i> Key Insights</h3>
@@ -211,6 +237,51 @@
             }
         });
 
+        // Store the original data
+        let currentYears = [...years];
+        let currentMaleRates = [...maleRates];
+        let currentFemaleRates = [...femaleRates];
+
+        function addTemporaryPoint(event) {
+            event.preventDefault();
+            
+            const year = parseInt(document.getElementById('yearInput').value);
+            const male = parseFloat(document.getElementById('maleRate').value);
+            const female = parseFloat(document.getElementById('femaleRate').value);
+
+            // Add new data points
+            currentYears.push(year);
+            currentMaleRates.push(male);
+            currentFemaleRates.push(female);
+
+            // Sort data by year
+            const indices = currentYears.map((_, i) => i);
+            indices.sort((a, b) => currentYears[a] - currentYears[b]);
+            
+            currentYears = indices.map(i => currentYears[i]);
+            currentMaleRates = indices.map(i => currentMaleRates[i]);
+            currentFemaleRates = indices.map(i => currentFemaleRates[i]);
+
+            // Update the chart
+            Plotly.update('genderChart', {
+                x: [currentYears, currentYears],
+                y: [currentMaleRates, currentFemaleRates]
+            });
+
+            // Reset form
+            document.getElementById('tempDataForm').reset();
+        }
+
+        function resetChart() {
+            currentYears = [...years];
+            currentMaleRates = [...maleRates];
+            currentFemaleRates = [...femaleRates];
+            
+            Plotly.update('genderChart', {
+                x: [years, years],
+                y: [maleRates, femaleRates]
+            });
+        }
     </script>
 </body>
 </html> 
