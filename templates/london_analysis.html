@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>London Analysis - Unemployment Insight Hub</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        url('https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover fixed;
+        }
+
+        .nav-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #37474f;
+            font-family: Arial, sans-serif;
+            font-weight: normal;
+            margin-bottom: 30px;
+        }
+
+        .add-data {
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+            color: #37474f;
+        }
+
+        .key-insights {
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+            color: #37474f;
+        }
+
+        .key-insights ul {
+            list-style-type: none;
+            padding-left: 0;
+            color: #2196f3;
+        }
+
+        .key-insights li {
+            margin: 5px 0;
+        }
+
+        input {
+            padding: 5px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <a href="/home" class="nav-button">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="/dashboard" class="nav-button">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="content-card">
+        <h2>London Unemployment Trends</h2>
+        <div id="londonChart"></div>
+        
+        <div class="add-data">
+            <h3>Add Temporary Data Point</h3>
+            <input type="number" id="yearInput" placeholder="Year (e.g. 2023)">
+            <input type="number" id="rateInput" placeholder="Rate %" step="0.1">
+            <button onclick="addTemporaryPoint()" class="nav-button">Add</button>
+            <button onclick="resetChart()" class="nav-button">Reset</button>
+        </div>
+
+        <div class="key-insights">
+            <h3>Key Insights</h3>
+            <ul>
+                <li>• Track London's unemployment rate over time</li>
+                <li>• Identify economic cycles specific to London</li>
+                <li>• Analyze recovery patterns post-economic events</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const londonData = {{ london_data|tojson }};
+        
+        // Initial trace setup
+        const trace = {
+            x: londonData.map(row => row[0]),
+            y: londonData.map(row => row[1]),
+            type: 'scatter',  // Changed from 'line' to 'scatter'
+            mode: 'lines',    // Added mode specification
+            name: 'London',
+            line: {
+                color: '#ff9800',
+                width: 3
+            }
+        };
+
+        const layout = {
+            title: {
+                text: 'London Unemployment Rate Trends',
+                font: {
+                    size: 24,
+                    color: '#37474f'
+                }
+            },
+            xaxis: {
+                title: 'Year',
+                gridcolor: '#f0f0f0',
+                tickangle: -45
+            },
+            yaxis: {
+                title: 'Unemployment Rate (%)',
+                range: [0, 10],
+                gridcolor: '#f0f0f0'
+            },
+            plot_bgcolor: 'white',
+            paper_bgcolor: 'white',
+            margin: { b: 100 }
+        };
+
+        // Store original data
+        let currentData = [...londonData];
+
+        // Create initial plot
+        Plotly.newPlot('londonChart', [trace], layout);
+
+        function addTemporaryPoint() {
+            const year = document.getElementById('yearInput').value;
+            const rate = parseFloat(document.getElementById('rateInput').value);
+
+            if (!year || !rate) {
+                alert('Please fill in both fields');
+                return;
+            }
+
+            if (rate < 0 || rate > 10) {
+                alert('Rate must be between 0 and 10');
+                return;
+            }
+
+            const periodString = `Jan ${year}-Dec ${year}`;
+            currentData.push([periodString, rate]);
+
+            // Sort data by year
+            currentData.sort((a, b) => {
+                const yearA = parseInt(a[0].split('-')[0].split(' ')[1]);
+                const yearB = parseInt(b[0].split('-')[0].split(' ')[1]);
+                return yearA - yearB;
+            });
+
+            // Update the plot
+            Plotly.restyle('londonChart', {
+                x: [currentData.map(row => row[0])],
+                y: [currentData.map(row => row[1])]
+            });
+
+            // Reset input fields
+            document.getElementById('yearInput').value = '';
+            document.getElementById('rateInput').value = '';
+        }
+
+        function resetChart() {
+            currentData = [...londonData];
+            
+            // Reset the plot to original data
+            Plotly.restyle('londonChart', {
+                x: [londonData.map(row => row[0])],
+                y: [londonData.map(row => row[1])]
+            });
+        }
+    </script>
+</body>
+</html> 

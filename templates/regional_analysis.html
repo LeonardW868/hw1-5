@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regional Analysis - Unemployment Insight Hub</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                        url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover fixed;
+        }
+
+        .nav-container {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 8px 20px;
+            background-color: #4285f4;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-left: 10px;
+            font-family: Arial, sans-serif;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            color: #37474f;
+            font-family: Arial, sans-serif;
+            font-weight: normal;
+            margin-bottom: 30px;
+        }
+
+        .add-data {
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+            color: #37474f;
+        }
+
+        .key-insights {
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+            color: #37474f;
+        }
+
+        .key-insights ul {
+            list-style-type: none;
+            padding-left: 0;
+            color: #2196f3;
+        }
+
+        .key-insights li {
+            margin: 5px 0;
+        }
+
+        input {
+            padding: 5px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <a href="/home" class="nav-button">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="/dashboard" class="nav-button">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </a>
+    </div>
+
+    <div class="content-card">
+        <h2>Regional Unemployment Comparison</h2>
+        <div id="regionalChart"></div>
+        
+        <div class="add-data">
+            <h3>Add Temporary Data Point</h3>
+            <form id="tempDataForm" onsubmit="event.preventDefault(); addTemporaryPoint();">
+                <input type="number" id="yearInput" placeholder="Year (e.g. 2023)">
+                <input type="text" id="regionInput" placeholder="Region (UK or LDN)">
+                <input type="number" id="rateInput" placeholder="Rate %" step="0.1">
+                <button type="submit" class="nav-button">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+                <button type="button" class="nav-button" onclick="resetChart()">
+                    <i class="fas fa-undo"></i> Reset
+                </button>
+            </form>
+        </div>
+
+        <div class="key-insights">
+            <h3>Key Insights</h3>
+            <ul>
+                <li>• Compare UK national average vs London unemployment rates</li>
+                <li>• Track historical trends and regional differences</li>
+                <li>• Analyze economic cycles and recovery periods</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Your existing chart configuration and data plotting code remains the same
+        const regionData = {{ region_data|tojson }};
+        
+        const traces = [
+            {
+                x: regionData.filter(row => row[1] === 'UK').map(row => row[0]),
+                y: regionData.filter(row => row[1] === 'UK').map(row => row[2]),
+                name: 'UK',
+                type: 'bar',
+                marker: { color: '#2196f3' }
+            },
+            {
+                x: regionData.filter(row => row[1] === 'LDN').map(row => row[0]),
+                y: regionData.filter(row => row[1] === 'LDN').map(row => row[2]),
+                name: 'LDN',
+                type: 'bar',
+                marker: { color: '#ff9800' }
+            }
+        ];
+
+        const layout = {
+            barmode: 'group',
+            yaxis: {
+                title: 'Unemployment Rate (%)',
+                range: [0, 10],
+                gridcolor: '#f0f0f0'
+            },
+            xaxis: {
+                tickangle: -45,
+                gridcolor: '#f0f0f0'
+            },
+            plot_bgcolor: 'white',
+            paper_bgcolor: 'white',
+            margin: { b: 100 }
+        };
+
+        Plotly.newPlot('regionalChart', traces, layout);
+
+        // Store original data
+        let currentData = [...regionData];
+
+        function addTemporaryPoint() {
+            const year = document.getElementById('yearInput').value;
+            const region = document.getElementById('regionInput').value;
+            const rate = parseFloat(document.getElementById('rateInput').value);
+
+            if (!year || !region || !rate) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (region !== 'UK' && region !== 'LDN') {
+                alert('Region must be either UK or LDN');
+                return;
+            }
+
+            const periodString = `Jan ${year}-Dec ${year}`;
+
+            // Find if the year already exists for the given region
+            const existingIndex = currentData.findIndex(row => 
+                row[0] === periodString && row[1] === region
+            );
+
+            if (existingIndex !== -1) {
+                // Update existing data point
+                currentData[existingIndex] = [periodString, region, rate];
+            } else {
+                // Add new data point
+                currentData.push([periodString, region, rate]);
+            }
+
+            // Update the chart
+            const updatedTraces = [
+                {
+                    x: currentData.filter(row => row[1] === 'UK').map(row => row[0]),
+                    y: currentData.filter(row => row[1] === 'UK').map(row => row[2])
+                },
+                {
+                    x: currentData.filter(row => row[1] === 'LDN').map(row => row[0]),
+                    y: currentData.filter(row => row[1] === 'LDN').map(row => row[2])
+                }
+            ];
+
+            Plotly.restyle('regionalChart', {
+                x: updatedTraces.map(trace => trace.x),
+                y: updatedTraces.map(trace => trace.y)
+            });
+
+            // Reset form
+            document.getElementById('tempDataForm').reset();
+        }
+    </script>
+</body>
+</html> 

@@ -13,17 +13,16 @@
             --accent-color: #e74c3c;
             --text-light: #ecf0f1;
             --text-dark: #2c3e50;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
+        /* Base styles */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', sans-serif;
             margin: 0;
-            padding: 0;
             background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
-                        url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
+                        url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80') center/cover fixed;
             color: var(--text-dark);
         }
 
@@ -33,35 +32,33 @@
             padding: 40px 20px;
         }
 
+        /* Card components */
+        .card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            padding: 20px 30px;
+            margin: 30px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .analysis-section { min-height: 500px; }
+        .insights { border-left: 5px solid var(--secondary-color); }
+        .add-data-section { border-left: 5px solid var(--accent-color); }
+
+        /* Header styles */
         h1 {
             text-align: center;
             color: var(--text-light);
             font-size: 2.5em;
-            margin-bottom: 40px;
             text-transform: uppercase;
             letter-spacing: 2px;
             padding: 20px;
             background: rgba(44, 62, 80, 0.8);
             border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: var(--shadow);
         }
 
-        .analysis-section {
-            background: rgba(255, 255, 255, 0.95);
-            margin: 30px 0;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .chart-container {
-            min-height: 500px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-        }
-
+        /* Navigation and buttons */
         .nav-buttons {
             text-align: center;
             margin: 20px 0;
@@ -74,60 +71,40 @@
             color: white;
             text-decoration: none;
             border-radius: 25px;
-            transition: all 0.3s ease;
+            transition: transform 0.3s ease;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-size: 0.9em;
             margin: 0 10px;
         }
 
         .button:hover {
             background-color: var(--primary-color);
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
         }
 
-        .insights {
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            border-left: 5px solid var(--secondary-color);
-        }
-
-        .insights h3 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .add-data-section {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            border-left: 5px solid var(--accent-color);
-        }
-
-        .add-data-section input {
+        /* Form elements */
+        input {
             padding: 8px;
             margin: 5px;
             border: 1px solid #ddd;
             border-radius: 5px;
         }
 
+        /* Chart container */
+        .chart-container {
+            min-height: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 768px) {
-            .container {
-                padding: 20px 10px;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .analysis-section {
-                padding: 20px;
-            }
+            .container { padding: 20px 10px; }
+            h1 { font-size: 2em; }
+            .card { padding: 15px; }
         }
     </style>
 </head>
@@ -144,7 +121,7 @@
             </a>
         </div>
 
-        <div class="analysis-section">
+        <div class="card">
             <div class="chart-container" id="genderChart"></div>
             
             <div class="add-data-section">

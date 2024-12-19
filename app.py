@@ -128,6 +128,43 @@ def check_data():
     html += '</table>'
     return html
 
+@app.route('/regional_analysis')
+def regional_analysis():
+    conn = sqlite3.connect('unemployment.db')
+    c = conn.cursor()
+    
+    # Get regional unemployment data
+    c.execute("""
+        SELECT tp.PeriodName, r.RegionName, ur.Rate
+        FROM UnemploymentRateByRegion ur
+        JOIN TimePeriod tp ON ur.PeriodID = tp.PeriodID
+        JOIN Region r ON ur.RegionID = r.RegionID
+        ORDER BY tp.PeriodID, r.RegionID
+    """)
+    region_data = c.fetchall()
+    conn.close()
+    
+    return render_template('regional_analysis.html', region_data=region_data)
+
+@app.route('/london_analysis')
+def london_analysis():
+    conn = sqlite3.connect('unemployment.db')
+    c = conn.cursor()
+    
+    # Fetch London-specific unemployment data
+    c.execute("""
+        SELECT tp.PeriodName, ur.Rate
+        FROM UnemploymentRateByRegion ur
+        JOIN TimePeriod tp ON ur.PeriodID = tp.PeriodID
+        JOIN Region r ON ur.RegionID = r.RegionID
+        WHERE r.RegionName = 'LDN'
+        ORDER BY tp.PeriodID
+    """)
+    london_data = c.fetchall()
+    conn.close()
+    
+    return render_template('london_analysis.html', london_data=london_data)
+
 if __name__ == '__main__':
     # Initialize the database
     init_db()
