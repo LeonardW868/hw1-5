@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=42.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --cov=coursework2"
+
+[project]
+name = "coursework2"
+version = "1.0.0"
+description = "Unemployment Analysis Application"
+authors = [
+    {name = "Leonard"}
+]
+
+[tool.coverage.run]
+source = ["coursework2"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "pass",
+] 
